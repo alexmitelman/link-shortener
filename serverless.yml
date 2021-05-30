@@ -1,0 +1,70 @@
+service: link-shortener
+
+frameworkVersion: '2'
+
+
+provider:
+  name: aws
+  runtime: python3.8
+  stage: dev
+  lambdaHashingVersion: '20201221'
+
+  environment:
+    CODES_TABLE: "codes-${self:provider.stage}"
+    LINKS_TABLE: "links-${self:provider.stage}"
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+          Resource: "*"
+
+
+resources:
+  Resources:
+    CodesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: code
+            AttributeType: S
+        KeySchema:
+          - AttributeName: code
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.CODES_TABLE}
+    
+    LinksTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: link
+            AttributeType: S
+        KeySchema:
+          - AttributeName: link
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.LINKS_TABLE}
+
+
+functions:
+  add_new_url:
+    handler: handler.add_new_url
+    events:
+      - httpApi:
+          path: /
+          method: post
+  read_url:
+    handler: handler.read_url
+    events:
+      - httpApi:
+          path: /{code}
+          method: get
+
