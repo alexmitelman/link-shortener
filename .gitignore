@@ -24,3 +24,7 @@ __pycache__/
 
 # Serverless directories
 .serverless
+
+#Chalice
+.chalice/deployments/
+.chalice/venv/
