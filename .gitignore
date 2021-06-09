@@ -20,6 +20,7 @@ __pycache__/
 .coverage
 .vscode/
 .idea/
+.mypy_cache/
 
 # Serverless directories
 .serverless
