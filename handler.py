@@ -1,58 +1,58 @@
 import json
-import string
-import random
 import os
+import random
+import string
+from typing import Any, Dict, Union
 
 import boto3
-
 
 LINKS_TABLE = os.environ["LINKS_TABLE"]
 CODES_TABLE = os.environ["CODES_TABLE"]
 client = boto3.client("dynamodb")
 
 
-def generate_random_string(number_of_chars):
+def generate_random_string(number_of_chars: int) -> str:
     list_of_chars = []
-    chars=string.ascii_letters + string.digits
+    chars = string.ascii_letters + string.digits
     for _ in range(number_of_chars):
         random_char = random.choice(chars)
         list_of_chars.append(random_char)
-    return ''.join(list_of_chars)
+    return "".join(list_of_chars)
 
 
-def get_code_for_link(link):
-    resp = client.get_item(TableName=LINKS_TABLE, Key={'link': {'S': link}})
+def get_code_for_link(link: str) -> str:
+    resp = client.get_item(TableName=LINKS_TABLE, Key={"link": {"S": link}})
     item = resp.get("Item")
     if item:
-        code = item.get('code').get('S')
+        code = item.get("code").get("S")
     else:
         code = None
     return code
 
 
-def get_link_by_code(code):
-    resp = client.get_item(TableName=CODES_TABLE, Key={'code': {'S': code}})
+def get_link_by_code(code: str) -> str:
+    resp = client.get_item(TableName=CODES_TABLE, Key={"code": {"S": code}})
     item = resp.get("Item")
     if item:
-        link = item.get('link').get('S')
+        link = item.get("link").get("S")
     else:
         link = None
     return link
 
 
-def save_record(link, code):
-    resp = client.put_item(
-        TableName=LINKS_TABLE,Item={'link': {'S': link}, 'code': {'S': code}}
+def save_record(link: str, code: str) -> None:
+    _ = client.put_item(
+        TableName=LINKS_TABLE, Item={"link": {"S": link}, "code": {"S": code}}
     )
 
-    resp = client.put_item(
-        TableName=CODES_TABLE,Item={'code': {'S': code}, 'link': {'S': link}}
+    _ = client.put_item(
+        TableName=CODES_TABLE, Item={"code": {"S": code}, "link": {"S": link}}
     )
 
     return
 
 
-def add_new_url(event, context):
+def add_new_url(event: Dict[str, Any], context: Union[int, slice]) -> str:
     body = json.loads(event["body"])
     original_url = body["link"]
     host = event["requestContext"]["domainName"]
@@ -71,29 +71,9 @@ def add_new_url(event, context):
     return json.dumps(body)
 
 
-def read_url(event, context):
+def read_url(event: Dict[str, Any], context: Union[int, slice]) -> str:
     print(event)
     code = event["pathParameters"]["code"]
 
     link = get_link_by_code(code)
-    return json.dumps({"location": link, "statusCode":301})
-
-
-def hello(event, context):
-    body = {
-        "message": "Go Serverless v2.0! Your function executed successfully!",
-        "input": event,
-    }
-
-    response = json.dumps(body)
-
-    return response
-
-    # Use this code if you don't use the http event with the LAMBDA-PROXY
-    # integration
-    """
-    return {
-        "message": "Go Serverless v1.0! Your function executed successfully!",
-        "event": event
-    }
-    """
+    return json.dumps({"location": link, "statusCode": 301})

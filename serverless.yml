@@ -38,7 +38,7 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: ${self:provider.environment.CODES_TABLE}
-    
+
     LinksTable:
       Type: AWS::DynamoDB::Table
       Properties:
@@ -67,4 +67,3 @@ functions:
       - httpApi:
           path: /{code}
           method: get
-
