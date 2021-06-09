@@ -17,6 +17,9 @@ var/
 *.egg
 __pycache__/
 .python-version
+.coverage
+.vscode/
+.idea/
 
 # Serverless directories
 .serverless
