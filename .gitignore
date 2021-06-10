@@ -28,3 +28,5 @@ __pycache__/
 #Chalice
 .chalice/deployments/
 .chalice/venv/
+
+.DS_Store

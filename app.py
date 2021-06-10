@@ -1,14 +1,16 @@
-import json
 import os
 import random
 import string
-from typing import Any, Dict, Union
+from typing import Dict
 
 import boto3
+from chalice import Chalice, Response
 
 LINKS_TABLE = os.environ["LINKS_TABLE"]
 CODES_TABLE = os.environ["CODES_TABLE"]
 client = boto3.client("dynamodb")
+
+app = Chalice(app_name="link-shortener")
 
 
 def generate_random_string(number_of_chars: int) -> str:
@@ -52,10 +54,11 @@ def save_record(link: str, code: str) -> None:
     return
 
 
-def add_new_url(event: Dict[str, Any], context: Union[int, slice]) -> str:
-    body = json.loads(event["body"])
+@app.route("/", methods=["POST"])
+def add_new_url() -> Dict[str, str]:
+    body = app.current_request.json_body
     original_url = body["link"]
-    host = event["requestContext"]["domainName"]
+    host = app.current_request.context["domainName"]
 
     code = get_code_for_link(original_url)
     if code:
@@ -66,14 +69,10 @@ def add_new_url(event: Dict[str, Any], context: Union[int, slice]) -> str:
 
     shortened_url = f"https://{host}/{url_code}"
 
-    body = {"shortened_url": shortened_url, "original_url": original_url}
-
-    return json.dumps(body)
+    return {"shortened_url": shortened_url, "original_url": original_url}
 
 
-def read_url(event: Dict[str, Any], context: Union[int, slice]) -> str:
-    print(event)
-    code = event["pathParameters"]["code"]
-
+@app.route("/{code}", methods=["GET"])
+def read_url(code: str) -> Response:
     link = get_link_by_code(code)
-    return json.dumps({"location": link, "statusCode": 301})
+    return Response(status_code=301, headers={"Location": link})
