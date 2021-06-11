@@ -75,4 +75,4 @@ def add_new_url() -> Dict[str, str]:
 @app.route("/{code}", methods=["GET"])
 def read_url(code: str) -> Response:
     link = get_link_by_code(code)
-    return Response(status_code=301, headers={"Location": link})
+    return Response(status_code=301, headers={"Location": link}, body=None)
