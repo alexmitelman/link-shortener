@@ -28,5 +28,7 @@ __pycache__/
 #Chalice
 .chalice/deployments/
 .chalice/venv/
+infrastructure/cdk.out
+infrastructure/chalice.out
 
 .DS_Store
