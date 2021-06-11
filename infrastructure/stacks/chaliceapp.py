@@ -24,7 +24,8 @@ class ChaliceApp(cdk.Stack):
                 "environment_variables": {
                     "LINKS_TABLE": self.links_table.table_name,
                     "CODES_TABLE": self.codes_table.table_name,
-                }
+                },
+                "api_gateway_stage": "l",
             },
         )
         self.links_table.grant_read_write_data(
